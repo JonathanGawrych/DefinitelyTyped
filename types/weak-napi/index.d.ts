@@ -1,9 +1,3 @@
-// Type definitions for weak-napi 1.0
-// Project: https://github.com/node-ffi-napi/weak-napi
-// Definitions by: Hieu Lam <https://github.com/lamhieu-vk>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.8
-
 /// <reference types="node" />
 
 declare class WeakRef<T> {}
@@ -16,6 +10,8 @@ declare class WeakRef<T> {}
 declare function weak<T extends object>(object: T, callback?: () => void): WeakRef<T>;
 
 declare namespace weak {
+    // export alias
+    const create: typeof weak;
     /**
      * Returns the actual reference to the Object that this weak reference was created with. If this is called with a dead reference, undefined is returned.
      * @param ref weak reference object

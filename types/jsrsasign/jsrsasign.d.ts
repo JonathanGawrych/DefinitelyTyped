@@ -1,6 +1,6 @@
 declare namespace jsrsasign {
-    type EncryptionAlgorithms = 'DES-CBC' | 'DES-EDE3-CBC' | 'AES-128-CBC' | 'AES-192-CBC' | 'AES-256-CBC';
-    type PrivateKeyOutputFormatType = 'PKCS1PRV' | 'PKCS5PRV' | 'PKCS8PRV';
+    type EncryptionAlgorithms = "DES-CBC" | "DES-EDE3-CBC" | "AES-128-CBC" | "AES-192-CBC" | "AES-256-CBC";
+    type PrivateKeyOutputFormatType = "PKCS1PRV" | "PKCS5PRV" | "PKCS8PRV";
 
     /**
      * convert an ArrayBuffer to a hexadecimal string
@@ -83,6 +83,20 @@ declare namespace jsrsasign {
      * @return UTF-8 encoded string
      */
     function b64utoutf8(s: string): string;
+
+    /**
+     * convert a Base64URL encoded string to a hexadecimal string.
+     * @param s Base64URL encoded string
+     * @return hexadecimal string
+     */
+    function b64tohex(s: string): string;
+
+    /**
+     * convert a base64 string to a byte/number array.
+     * @param s Base64URL encoded string
+     * @return byte/number array
+     */
+    function b64toBA(s: string): number[];
 
     /**
      * convert an array of bytes(Number) to hexadecimal string.

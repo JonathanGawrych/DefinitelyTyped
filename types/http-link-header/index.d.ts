@@ -1,11 +1,10 @@
-// Type definitions for http-link-header 1.0.2
-// Project: https://github.com/jhermsmeier/node-http-link-header
-// Definitions by: Christian Rackerseder <https://github.com/screendriver>
-//                 Noah Loomans <https://github.com/nloomans>
-//                 Harris Lummis <https://github.com/lummish>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
+/// <reference types="node" />
+
 export = Link;
 
+/**
+ * Parse & format HTTP link headers according to RFC 8288
+ */
 declare class Link {
     /**
      * Creates a new Link by parsing a link header beginning at the provided
@@ -15,6 +14,19 @@ declare class Link {
      * @return A new Link
      */
     static parse(value: string, offset?: number): Link;
+    /**
+     * Determines whether an encoding can be
+     * natively handled with a `Buffer`
+     */
+    static isCompatibleEncoding(value: string): boolean;
+    static isSingleOccurenceAttr(attr: string): boolean;
+    static isTokenAttr(attr: string): boolean;
+    static escapeQuotes(value: string): string;
+    static formatExtendedAttribute(attr: string, data: Link.LinkData): string;
+    /**
+     * Format a given attribute and it's value
+     */
+    static formatAttribute(attr: string, value: string | Buffer | Array<string | Buffer>): string;
     /**
      * Link
      * @param value Link header to parse
@@ -37,18 +49,37 @@ declare class Link {
     rel(value: string): Link.Reference[];
     set(ref: Link.Reference): Link;
     /**
+     * Sets a reference if a reference with similar properties isn’t already set
+     * @param ref A reference to set
+     * @return The calling instance
+     */
+    setUnique(ref: Link.Reference): Link;
+    /**
      * Parse a link header beginning at the provided offset
      * @param value The header to parse
      * @param offset The offset to start at. Defaults to 0.
      * @return The calling instance
      */
     parse(value: string, offset?: number): Link;
+    /**
+     * Get a string representation of the link header instance
+     * @return A string representation of the link header instance
+     */
+    toString(): string;
 }
 
 declare namespace Link {
-  interface Reference {
-      uri: string;
-      rel: string;
-      [index: string]: string;
-  }
+    interface Reference {
+        uri: string;
+        rel: string;
+        [index: string]: string;
+    }
+
+    interface LinkData {
+        /** @default 'utf-8' */
+        encoding?: string | undefined;
+        /** @default 'en' */
+        language?: string | undefined;
+        value: string | Buffer;
+    }
 }

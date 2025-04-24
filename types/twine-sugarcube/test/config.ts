@@ -1,3 +1,6 @@
+const b = true;
+const s = "";
+
 Config.addVisitedLinkClass = true;
 
 Config.audio.pauseOnFadeToZero = true;
@@ -14,14 +17,26 @@ Config.loadDelay = 123;
 
 Config.macros.ifAssignmentError = true;
 Config.macros.maxLoopIterations = 123;
+Config.macros.typeSkipKey = s;
+Config.macros.typeVisitedPassages = b;
 
 Config.navigation.override = (passageName: string) => passageName + "anything";
 
-// @ts-expect-error
-Config.passages.descriptions = false;
-Config.passages.descriptions = true;
-Config.passages.descriptions = null;
-Config.passages.descriptions = function() { return this.domId; };
+Config.saves.descriptions = function(saveType) {
+    const base = `("turn") ${State.turns})`;
+
+    switch (saveType) {
+        case Save.Type.Auto:
+            return `${base} A browser auto save…`;
+        case Save.Type.Base64:
+            return `${base} A base64 save…`;
+        case Save.Type.Disk:
+            return `${base} A local disk save…`;
+        case Save.Type.Slot:
+            return `${base} A browser slot save…`;
+    }
+};
+
 Config.passages.displayTitles = false;
 Config.passages.nobr = true;
 Config.passages.onProcess = (passage) => passage.text;
@@ -30,7 +45,7 @@ Config.passages.transitionOut = 123;
 Config.passages.transitionOut = "property";
 
 Config.saves.autoload = false;
-Config.saves.autoload = "promt";
+Config.saves.autoload = "prompt";
 // a typo
 // @ts-expect-error
 Config.saves.autoload = "pront";
@@ -65,8 +80,13 @@ Config.saves.onLoad = (save: TwineSugarCube.SaveObject) => {};
 
 Config.saves.onSave = null;
 Config.saves.onSave = (save: TwineSugarCube.SaveObject) => {};
+Config.saves.onSave = (save: TwineSugarCube.SaveObject, details: TwineSugarCube.SaveDetails) => {};
 
 Config.saves.slots = 123;
 
+Config.saves.tryDiskOnMobile = b;
+
 Config.saves.version = 123;
 Config.saves.version = "ver-2";
+
+export {};

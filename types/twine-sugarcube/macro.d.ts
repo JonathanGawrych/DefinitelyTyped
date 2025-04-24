@@ -17,7 +17,7 @@ export interface MacroTags {
     has(name: string): boolean;
 }
 
-export interface MacroArgsArray extends Array<string> {
+export interface MacroArgsArray extends Array<any> {
     /**
      * The current tag's argument string after converting all TwineScript syntax elements into their
      * native JavaScript counterparts. Equivalent in function to <MacroContext>.args.full.
@@ -29,7 +29,7 @@ export interface MacroArgsArray extends Array<string> {
     raw: string;
 }
 
-export interface MacroContexObject {
+export interface MacroContextObject {
     /**
      * Name of the current tag.
      */
@@ -46,7 +46,10 @@ export interface MacroContexObject {
     contents: string;
 }
 
-export interface MacroContex {
+type ShadowWrapperCallback<T extends any[]> = (this: MacroContext, ...args: T) => void;
+type ContextPredicate = (context: MacroContextObject) => boolean;
+
+export interface MacroContext {
     /**
      * The argument string parsed into an array of discrete arguments.
      * @since 2.0.0
@@ -63,19 +66,25 @@ export interface MacroContex {
      * The current output element.
      * @since 2.0.0
      */
-    output: HTMLElement;
+    output: DocumentFragment | HTMLElement;
 
     /**
      * The (execution) context object of the macro's parent, or null if the macro has no parent.
      * @since 2.0.0
      */
-    parent: object;
+    parent: null | object;
+
+    /**
+     * The parser instanced that generated the macro call.
+     * @since 2.0.0
+     */
+    parser: unknown;
 
     /**
      * The text of a container macro parsed into discrete payload objects by tag.
      * @since 2.0.0
      */
-    payload: MacroContexObject[];
+    payload: MacroContextObject[];
 
     /**
      * The macro's definition — created via @see Macro.add()
@@ -84,13 +93,34 @@ export interface MacroContex {
     self: object;
 
     /**
+     * Returns a new array containing all of the macro's ancestors that passed the test implemented by the
+     * given predicate function or an empty array, if no members pass.
+     * @param predicate The function used to test each ancestor execution context object, which is passed in as its sole parameter.
+     * @since 2.37.0
+     * @example
+     * var isInclude = function (ctx) { return ctx.name === "include"; };
+     * this.contextFilter(isInclude); // Returns an array of all <<include>> macro ancestors
+     */
+    contextFilter(predicate: ContextPredicate): object[];
+
+    /**
+     * Returns the first of the macro's ancestors that passed the test implemented by the given predicate function or undefined, if no members pass.
+     * @param predicate The function used to test each ancestor execution context object, which is passed in as its sole parameter.
+     * @since 2.37.0
+     * @example
+     * var isInclude = function (ctx) { return ctx.name === "include"; };
+     * this.contextFind(isInclude); // Returns the first <<include>> macro ancestor
+     */
+    contextFind(predicate: ContextPredicate): object | undefined;
+    /**
      * Returns whether any of the macro's ancestors passed the test implemented by the given
      * filter function.
      * @param filter he function used to test each ancestor execution context object, which
      * is passed in as its sole parameter.
      * @since 2.0.0
+     * @deprecated in 2.37.0 in favor of contextSome()
      */
-    contextHas(filter: (context: MacroContexObject) => boolean): boolean;
+    contextHas(filter: ContextPredicate): boolean;
 
     /**
      * Returns the first of the macro's ancestors which passed the test implemented by the given
@@ -98,16 +128,45 @@ export interface MacroContex {
      * @param filter The function used to test each ancestor execution context object, which is
      * passed in as its sole parameter.
      * @since 2.0.0
+     * @deprecated in 2.37.0 in favor of contextFind()
      */
-    contextSelect(filter: (context: MacroContexObject) => boolean): object;
+    contextSelect(filter: ContextPredicate): object;
 
     /**
      * Returns a new array containing all of the macro's ancestors which passed the test implemented
      * by the given filter function or an empty array, if no members pass.
      * @since 2.0.0
      * @param filter
+     * @deprecated in 2.37.0 in favor of contextFilter()
      */
-    contextSelectAll(filter: (context: MacroContexObject) => boolean): object[];
+    contextSelectAll(filter: ContextPredicate): object[];
+
+    /**
+     * Returns whether any of the macro's ancestors passed the test implemented by the given predicate function.
+     * @param predicate The function used to test each ancestor execution context object, which is passed in as its sole parameter.
+     * @since 2.37.0
+     * @example
+     * var isInclude = function (ctx) { return ctx.name === "include"; };
+     * this.contextSome(isInclude);  // Returns true if any ancestor was an <<include>> macro
+     */
+    contextSome(predicate: ContextPredicate): boolean;
+
+    /**
+     * Returns a callback function that wraps the given callbacks to provide access to the variable
+     * shadowing system.
+     * This is only useful if you have an asynchronous callback (such as a button being pressed)
+     * that invokes code/content that needs to access variables shadowed by `<<capture>>`.
+     * @param callback Executed when the wrapper is invoked. Receives access to variable shadows.
+     * @param doneCallback Executed after the main callback returns. Does not have access.
+     * @param startCallback Executed before the main callback is invoked. Does not have access.
+     * @since 2.14.0
+     * @deprecated in favor of shadowHandler()
+     */
+    createShadowWrapper<T extends any[]>(
+        callback: ShadowWrapperCallback<T>,
+        doneCallback?: ShadowWrapperCallback<T>,
+        startCallback?: ShadowWrapperCallback<T>,
+    ): (...args: T) => void;
 
     /**
      * Renders the message prefixed with the name of the macro and returns false.
@@ -115,6 +174,38 @@ export interface MacroContex {
      * @since 2.0.0
      */
     error(message: string): false;
+
+    /**
+     * Returns a callback function that wraps the specified callback functions to provide access to the variable shadowing system used by the <<capture>> macro.
+     * NOTE: All of the specified callbacks are invoked as the wrapper is invoked—meaning, with their this set to the this of the wrapper and with whatever parameters were passed to the wrapper.
+     * WARNING: Only useful when you have an asynchronous callback that invokes code/content that needs to access story and/or temporary variables shadowed by <<capture>>. If you don't know what that means, then this API is likely not for you.
+     * @param callback
+     * @param doneCallback
+     * @param startCallback
+     */
+    shadowHandler<TEvent extends Event>(
+        callback: (ev: TEvent) => void,
+        doneCallback?: (ev: TEvent) => void,
+        startCallback?: (ev: TEvent) => void,
+    ): (event: TEvent) => void;
+}
+
+export interface MacroDefinition {
+    handler: (this: MacroContext) => void;
+    /**
+     * Having this property signifies that this is a container macro
+     * This should be an array of child tag names or `null`
+     * @since 2.0.0
+     */
+    tags?: string[] | null | undefined;
+    /**
+     * Disables parsing argument strings into discrete arguments.
+     * This is used by macros that only use the raw/full argument strings.
+     * `true` to affect all tags
+     * Or Array of tags to affect
+     * @since 2.0.0
+     */
+    skipArgs?: boolean | undefined | string[];
 }
 
 export interface MacroAPI {
@@ -156,9 +247,7 @@ export interface MacroAPI {
      *    }
      * });
      */
-    add(name: string | string[],
-        definition: {handler: (this: MacroContex) => void, tags?: string[], skipArgs?: boolean},
-        deep?: boolean): void;
+    add(name: string | string[], definition: MacroDefinition, deep?: boolean): void;
 
     /**
      * Remove existing macro(s).
@@ -172,7 +261,7 @@ export interface MacroAPI {
      * @param name Name of the macro whose definition should be returned.
      * @since 2.0.0
      */
-    get(name: string): object;
+    get(name: string): MacroDefinition;
 
     /**
      * Returns whether the named macro exists.

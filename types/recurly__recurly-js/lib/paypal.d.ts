@@ -1,21 +1,40 @@
 import { Emitter } from './emitter';
-import { TokenHandler } from './token';
+
+export type PayPalDisplayConfig = {
+  locale?: string;
+  displayName?: string;
+  amount?: string;
+};
 
 export type BraintreeConfig = {
   braintree: {
     clientAuthorization: string;
   };
-};
-
-export type DirectConfig = {
-  display?: {
-    displayName?: string;
+  display?: PayPalDisplayConfig & {
+    enableShippingAddress?: boolean;
+    shippingAddressOverride?: any;
+    shippingAddressEditable?: boolean;
+    billingAgreementDescription?: string;
+    landingPageType?: string;
   };
 };
 
-export type PayPalConfig = BraintreeConfig | DirectConfig;
+export type DirectConfig = {
+  gatewayCode?: string;
+  display?: PayPalDisplayConfig & {
+    logoImageUrl?: string;
+    headerImageUrl?: string;
+  };
+};
 
-export type PayPalEvent = 'error' | 'token';
+export type PayPalCompleteConfig = {
+  payPalComplete?: boolean;
+  display?: PayPalDisplayConfig;
+};
+
+export type PayPalConfig = BraintreeConfig | DirectConfig | PayPalCompleteConfig;
+
+export type PayPalEvent = 'error' | 'token' | 'cancel' | 'ready';
 
 export type PayPalStartOptions = {
   options: {
@@ -24,8 +43,11 @@ export type PayPalStartOptions = {
 };
 
 export interface PayPalInstance extends Emitter<PayPalEvent> {
+  /**
+   * @see {@link https://developers.recurly.com/reference/recurly-js/index.html#fn-paypalstart|PayPal.start}
+   */
   start: (payPalStartOptions?: PayPalStartOptions) => void;
-  token: TokenHandler;
+
   destroy: VoidFunction;
 }
 

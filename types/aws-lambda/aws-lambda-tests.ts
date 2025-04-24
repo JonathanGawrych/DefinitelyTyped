@@ -9,6 +9,8 @@ declare let strOrNull: string | null;
 declare let strOrUndefined: string | undefined;
 declare let strOrUndefinedOrNull: string | undefined | null;
 declare let date: Date;
+declare let obj: {};
+declare let array: any[];
 declare let anyObj: any;
 declare let num: number;
 declare let error: Error;
@@ -17,6 +19,8 @@ declare let boolOrUndefined: boolean | undefined;
 declare let boolOrNumOrStr: boolean | number | string;
 declare let numOrUndefined: number | undefined;
 declare let strArrayOrUndefined: string[] | undefined;
+declare let nullOrUndefined: null | undefined;
+declare let objectOrUndefined: {} | undefined;
 
 // handler.d.ts types
 declare let context: AWSLambda.Context;
@@ -74,10 +78,12 @@ untypedCallback(null, str);
 untypedCallback(null, num);
 untypedCallback(null, { foo: 123 });
 untypedCallback(null, { bar: 123 });
-// $ExpectError
+// @ts-expect-error
 untypedCallback(null, anyObj, anyObj);
 
-interface TestResult { foo: number; }
+interface TestResult {
+    foo: number;
+}
 declare const typedCallback: AWSLambda.Callback<TestResult>;
 typedCallback();
 typedCallback(undefined);
@@ -86,9 +92,9 @@ typedCallback(error);
 typedCallback(str); // https://docs.aws.amazon.com/apigateway/latest/developerguide/handle-errors-in-lambda-integration.html
 typedCallback(null, anyObj);
 typedCallback(null, { foo: 123 });
-// $ExpectError
+// @ts-expect-error
 typedCallback(null, str);
-// $ExpectError
+// @ts-expect-error
 typedCallback(null, { bar: 123 });
 
 /* Compatibility functions */
@@ -107,7 +113,7 @@ interface CustomEvent {
 }
 interface CustomResult {
     resultString: string;
-    resultBool?: boolean;
+    resultBool?: boolean | undefined;
 }
 type CustomHandler = AWSLambda.Handler<CustomEvent, CustomResult>;
 type CustomCallback = AWSLambda.Callback<CustomResult>;
@@ -148,9 +154,9 @@ const untypedCallbackHandler: AWSLambda.Handler = (event, context, cb) => {
  */
 
 // Test we get error for unsafe old style
-// $ExpectError
+// @ts-expect-error
 const unsafeAsyncHandler: CustomHandler = async (event, context, cb) => {
-    cb(null, { resultString: 'No longer valid' });
+    cb(null, { resultString: "No longer valid" });
 };
 
 // Test safe old style still works
@@ -166,10 +172,10 @@ const typedCallbackHandler: CustomHandler = (event, context, cb) => {
     cb();
     cb(null);
     cb(new Error());
-    // $ExpectError
+    // @ts-expect-error
     cb(null, {});
     cb(null, { resultString: str });
-    // $ExpectError
+    // @ts-expect-error
     cb(null, { resultString: bool });
 };
 
@@ -183,10 +189,10 @@ const typedAsyncHandler: CustomHandler = async (event, context, cb) => {
     cb;
     // Can still use callback
     cb(null, { resultString: str });
-    return { resultString: 'Is now valid!' };
+    return { resultString: "Is now valid!" };
 };
 
-// $ExpectError
+// @ts-expect-error
 const badTypedAsyncHandler: CustomHandler = async (event, context, cb) => ({ resultString: bool });
 
 // Test using untyped Callback type still works.
@@ -195,3 +201,20 @@ const mixedUntypedCallbackTypedHandler: CustomHandler = (
     context: AWSLambda.Context,
     cb: AWSLambda.Callback,
 ) => {};
+
+// Test streamifyResponse
+const streamifyResponseHandler: AWSLambda.StreamifyHandler = (event, responseStream, context) => {
+    const metadata = {
+        statusCode: 200,
+        headers: {
+            "Content-Type": "application/json",
+            "CustomHeader": "outerspace",
+        },
+    };
+    responseStream = awslambda.HttpResponseStream.from(responseStream, metadata);
+    responseStream.setContentType("text/plain");
+    responseStream.write("Hello, world!");
+    responseStream.end();
+};
+
+awslambda.streamifyResponse(streamifyResponseHandler);

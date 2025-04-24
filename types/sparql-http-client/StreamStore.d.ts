@@ -1,19 +1,23 @@
-import { Store } from "./";
-import { BaseQuad, Quad, DataFactory } from "rdf-js";
-import Endpoint = require("./Endpoint");
+import { BaseQuad, Quad, Quad_Graph, Stream } from "@rdfjs/types";
+import SimpleClient from "./SimpleClient.js";
 
-declare namespace StreamStore {
-    interface StreamStoreInit<Q extends BaseQuad = Quad> {
-        endpoint: Endpoint;
-        factor?: DataFactory<Q>;
-    }
+type HTTPMethod = "POST" | "PUT" | "DELETE";
+
+export interface StreamStore<Q extends BaseQuad = Quad> {
+    get(graph: Quad_Graph): Stream<Q>;
+    post(stream: Stream, options?: { graph?: Quad_Graph }): Promise<void>;
+    put(stream: Stream, options?: { graph?: Quad_Graph }): Promise<void>;
 }
 
-interface StreamStore<Q extends BaseQuad = Quad> extends Store<Q> {}
+declare class Impl<Q extends BaseQuad = Quad> implements StreamStore<Q> {
+    constructor(options: { client: SimpleClient });
 
-// tslint:disable-next-line no-unnecessary-class
-declare class StreamStore<Q extends BaseQuad = Quad> {
-    constructor(options: StreamStore.StreamStoreInit<Q>)
+    get(graph: Quad_Graph): Stream<Q>;
+    post(stream: Stream, options?: { graph?: Quad_Graph }): Promise<void>;
+    put(stream: Stream, options?: { graph?: Quad_Graph }): Promise<void>;
+
+    read(options?: { graph?: Quad_Graph; method: HTTPMethod }): Stream<Q>;
+    write(options?: { graph?: Quad_Graph; method: HTTPMethod; stream: Stream }): Promise<void>;
 }
 
-export = StreamStore;
+export default Impl;

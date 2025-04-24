@@ -1,6 +1,6 @@
-import * as React from 'react';
-import { StyleSheet, View, Animated, Easing, ViewStyle, Insets } from 'react-native';
-import Ripple from 'react-native-material-ripple';
+import * as React from "react";
+import { Animated, Easing, Insets, StyleSheet, View, ViewStyle } from "react-native";
+import Ripple from "react-native-material-ripple";
 
 const RippleTestOptionalProps: React.FC = () => {
     return <Ripple />;
@@ -8,8 +8,9 @@ const RippleTestOptionalProps: React.FC = () => {
 
 const RippleTest: React.FC = () => {
     const aNumber = 10;
-    const aString = 'string';
+    const aString = "string";
     const callback = () => {};
+    const predicate = () => true;
 
     const insets: Insets = {
         top: aNumber,
@@ -37,8 +38,7 @@ const RippleTest: React.FC = () => {
             rippleFades={false}
             disabled={false}
             onRippleAnimation={callback}
-            accessibilityActions={[{ name: 'activate' }]}
-            accessibilityComponentType="radiobutton_checked"
+            accessibilityActions={[{ name: "activate" }]}
             accessibilityElementsHidden
             accessibilityHint="string"
             accessibilityIgnoresInvertColors
@@ -46,7 +46,6 @@ const RippleTest: React.FC = () => {
             accessibilityLiveRegion="none"
             accessibilityRole="button"
             accessibilityState={{ disabled: false }}
-            accessibilityTraits="header"
             accessibilityValue={{
                 min: aNumber,
                 max: aNumber,
@@ -76,8 +75,8 @@ const RippleTest: React.FC = () => {
             onLayout={callback}
             onLongPress={callback}
             onMagicTap={callback}
-            onMoveShouldSetResponder={callback}
-            onMoveShouldSetResponderCapture={callback}
+            onMoveShouldSetResponder={predicate}
+            onMoveShouldSetResponderCapture={predicate}
             onPress={callback}
             onPressIn={callback}
             onPressOut={callback}
@@ -88,9 +87,9 @@ const RippleTest: React.FC = () => {
             onResponderRelease={callback}
             onResponderStart={callback}
             onResponderTerminate={callback}
-            onResponderTerminationRequest={callback}
-            onStartShouldSetResponder={callback}
-            onStartShouldSetResponderCapture={callback}
+            onResponderTerminationRequest={predicate}
+            onStartShouldSetResponder={predicate}
+            onStartShouldSetResponderCapture={predicate}
             onTouchCancel={callback}
             onTouchEnd={callback}
             onTouchEndCapture={callback}
@@ -102,6 +101,7 @@ const RippleTest: React.FC = () => {
             renderToHardwareTextureAndroid
             shouldRasterizeIOS
             tvParallaxMagnification={aNumber}
+            // @ts-expect-error -- No longer part of props with latest `react-native` types
             tvParallaxProperties={{
                 enabled: true,
                 shiftDistanceX: aNumber,
@@ -122,5 +122,5 @@ const RippleTest: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    wrapper: {} as any as ViewStyle,
+    wrapper: ({} as any) as ViewStyle,
 });

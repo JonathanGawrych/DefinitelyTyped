@@ -1,10 +1,4 @@
-// Type definitions for json-schema-faker 0.5
-// Project: https://github.com/json-schema-faker/json-schema-faker
-// Definitions by: Charles Desbiens <https://github.com/baremaximum>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 3.8
-
-import { JSONSchema4, JSONSchema6, JSONSchema7 } from 'json-schema';
+import { JSONSchema4, JSONSchema6, JSONSchema7 } from "json-schema";
 
 declare namespace jsf {
     const version: string;
@@ -13,7 +7,7 @@ declare namespace jsf {
     function define(name: string, cb: () => void): any;
     function reset(name: string): any;
     function locate(name: string): any;
-    function generate(schema: Schema, refs?: string | Schema[]): any[];
+    function generate(schema: Schema, refs?: string | Schema[]): any;
     function resolve(schema: Schema, refs?: string | Schema[], cwd?: string): Promise<any[]>;
     function option(option: string | OptionInputObject, value?: any): any;
 
@@ -36,29 +30,29 @@ declare namespace jsf {
 
     // List of all valid registerable options.
     type jsfOptions =
-        | 'defaultInvalidTypeProduct'
-        | 'defaultRandExpMax'
-        | 'ignoreProperties'
-        | 'ignoreMissingRefs'
-        | 'failOnInvalidTypes'
-        | 'failOnInvalidFormat'
-        | 'alwaysFakeOptionals'
-        | 'optionalsProbability'
-        | 'fixedProbabilities'
-        | 'useExamplesValue'
-        | 'useDefaultValue'
-        | 'requiredOnly'
-        | 'minItems'
-        | 'maxItems'
-        | 'minLength'
-        | 'maxLength'
-        | 'refDepthMin'
-        | 'refDepthMax'
-        | 'resolveJsonPath'
-        | 'reuseProperties'
-        | 'fillProperties'
-        | 'random'
-        | 'replaceEmptyByRandomValue';
+        | "defaultInvalidTypeProduct"
+        | "defaultRandExpMax"
+        | "ignoreProperties"
+        | "ignoreMissingRefs"
+        | "failOnInvalidTypes"
+        | "failOnInvalidFormat"
+        | "alwaysFakeOptionals"
+        | "optionalsProbability"
+        | "fixedProbabilities"
+        | "useExamplesValue"
+        | "useDefaultValue"
+        | "requiredOnly"
+        | "minItems"
+        | "maxItems"
+        | "minLength"
+        | "maxLength"
+        | "refDepthMin"
+        | "refDepthMax"
+        | "resolveJsonPath"
+        | "reuseProperties"
+        | "fillProperties"
+        | "random"
+        | "replaceEmptyByRandomValue";
 }
 
 /** @deprecated calling JsonSchemaFaker() is deprecated, call either .generate() or .resolve()' */

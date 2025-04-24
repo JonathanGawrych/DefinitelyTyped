@@ -1,14 +1,17 @@
-import weak = require('weak-napi');
+import weak = require("weak-napi");
 
-const obj = {a: 123};
+const obj = { a: 123 };
 
 const weakReference = weak(obj, () => {
     // collected
 });
 
+// should also work with create alias
+weak.create(obj, () => {}); // $ExpectType WeakRef<{ a: number; }>
+
 const sameType = weak.get(weakReference);
 
-function foo(a: {a: number}) {}
+function foo(a: { a: number }) {}
 
 if (sameType) {
     foo(sameType);
@@ -21,6 +24,6 @@ if (weak.isWeakRef(anyVar)) {
 }
 
 if (weak.isDead(weakReference)) {
-    const a = weakReference; // $ExpectType WeakRef<undefined>
+    const a = weakReference; // $ExpectType WeakRef<undefined> || WeakRef<{ a: number; }>
     const value = weak.get(weakReference); // undefined only possible
 }

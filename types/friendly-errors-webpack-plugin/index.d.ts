@@ -1,34 +1,34 @@
-// Type definitions for friendly-errors-webpack-plugin 0.1
-// Project: https://github.com/geowarin/friendly-errors-webpack-plugin
-// Definitions by: Arne Bahlo <https://github.com/bahlo>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.4
-
-import { Plugin, Compiler } from 'webpack';
+import { Plugin } from "webpack";
 
 export = FriendlyErrorsWebpackPlugin;
 
 declare class FriendlyErrorsWebpackPlugin extends Plugin {
     constructor(options?: FriendlyErrorsWebpackPlugin.Options);
-
-    apply(compiler: Compiler): void;
 }
 
 declare namespace FriendlyErrorsWebpackPlugin {
-    enum Severity {
-        Error = "error",
-        Warning = "warning",
-    }
+    type Severity = "error" | "warning";
 
     interface Options {
         compilationSuccessInfo?: {
-            messages: string[],
-            notes: string[],
-        };
-        onErrors?(severity: Severity, errors: string): void;
-        clearConsole?: boolean;
-        additionalFormatters?: Array<(errors: WebpackError[], type: Severity) => string[]>;
-        additionalTransformers?: Array<(error: any) => any>;
+            messages: string[];
+            notes: string[];
+        } | undefined;
+
+        /**
+         * You can listen to errors transformed and prioritized by the plugin.
+         */
+        onErrors?(severity: Severity, errors: WebpackError[]): void;
+
+        /**
+         * Whether the console should be cleared between each compilation.
+         * @default true
+         */
+        clearConsole?: boolean | undefined;
+
+        additionalFormatters?: Array<(errors: WebpackError[], type: Severity) => string[]> | undefined;
+
+        additionalTransformers?: Array<(error: any) => any> | undefined;
     }
 
     interface WebpackError {

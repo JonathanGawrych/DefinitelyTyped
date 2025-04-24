@@ -6,22 +6,22 @@ export interface SettingDefinition {
     /**
      * Description explaining the control in greater detail.
      */
-    desc?: string;
+    desc?: string | undefined;
     /**
      * The function to call during initialization.
      */
-    onInit?: () => void;
+    onInit?: (() => void) | undefined;
     /**
      * The function to call when the control's state is changed.
      */
-    onChange?: () => void;
+    onChange?: (() => void) | undefined;
 }
 
 export interface ToggleDefinition extends SettingDefinition {
     /**
      * The default value for the setting and default state of the control. Leaving it undefined means to use false as the default.
      */
-    default?: boolean;
+    default?: boolean | undefined;
 }
 
 export interface ListDefinition<T> extends SettingDefinition {
@@ -32,12 +32,12 @@ export interface ListDefinition<T> extends SettingDefinition {
     /**
      *  Description explaining the control in greater detail.
      */
-    desc?: string;
+    desc?: string | undefined;
     /**
      * The default value for the setting and default state of the control. It should have the same value as one of the members of
      * the list array. Leaving it undefined means to use the first array member as the default.
      */
-    default?: T;
+    default?: T | undefined;
 }
 
 export interface RangeDefinition extends SettingDefinition {
@@ -56,7 +56,7 @@ export interface RangeDefinition extends SettingDefinition {
     /**
      * The default value for the setting and default state of the control. Leaving it undefined means to use the value of max as the default.
      */
-    default?: number;
+    default?: number | undefined;
 }
 
 export interface SettingsAPI {
@@ -150,7 +150,7 @@ export interface SettingsAPI {
      *     onChange : settingThemeHandler
      * }); // default value not defined, so the first array member "(none)" is used
      */
-    // tslint:disable-next-line:no-unnecessary-generics
+    // eslint-disable-next-line @definitelytyped/no-unnecessary-generics
     addList<T>(name: string, definition: ListDefinition<T>): void;
 
     /**
@@ -202,6 +202,23 @@ export interface SettingsAPI {
      * @since 2.0.0
      */
     save(): void;
+
+    /**
+     * Returns the setting's current value.
+     *
+     * **NOTE**: Calling this method is equivalent to using settings[name].
+     * @since 2.37.0
+     */
+    getValue(name: string): any;
+
+    /**
+     * Sets the setting's value.
+     *
+     * **NOTE**: This method automatically calls the Setting.save() method.
+     * **WARNING**: If manually changing a setting that has an associated control, be mindful that the value you set makes sense for the setting in question, elsewise shenanigans could occur—e.g., don't set a range-type setting to non-number or out-of-range values.
+     * @since 2.37.0
+     */
+    setValue(name: string, value: any): void;
 }
 
 export {};

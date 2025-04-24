@@ -1,12 +1,6 @@
-// Type definitions for vast-client 2.1
-// Project: https://github.com/dailymotion/vast-client-js#readme
-// Definitions by: John G. Gainfort Jr. <https://github.com/jgainfort>, Sara Nordmyr da Cunha <https://github.com/kobawan>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.8
-
 /// <reference types="node" />
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from "events";
 
 export class VASTTracker extends EventEmitter {
     /**
@@ -42,7 +36,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * Current playback time in seconds.
          */
-        progress: number
+        progress: number,
     ): void;
     /**
      * Update the mute state and call the mute/unmute tracking URLs. Emit a mute or unmute event.
@@ -51,7 +45,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * Indicate if the video is muted or not.
          */
-        muted: boolean
+        muted: boolean,
     ): void;
     /**
      * Update the pause state and call the resume/pause tracking URLs. Emit a resume or pause event.
@@ -60,7 +54,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * Indicate if the video is paused or not.
          */
-        paused: boolean
+        paused: boolean,
     ): void;
     /**
      * Update the fullscreen state and call the fullscreen tracking URLs. Emit a fullscreen or exitFullscreen event.
@@ -69,7 +63,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * Indicate the fullscreen mode.
          */
-        fullscreen: boolean
+        fullscreen: boolean,
     ): void;
     /**
      * Update the expand state and call the expand/collapse tracking URLs. Emit a expand or collapse event
@@ -89,7 +83,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * The time in seconds until the skip button is displayed.
          */
-        duration: number
+        duration: number,
     ): void;
     /**
      * Report the impression URI. Can only be called once. Will report the following URI:
@@ -107,7 +101,7 @@ export class VASTTracker extends EventEmitter {
         /**
          * Replaces [ERRORCODE] macro. [ERRORCODE] values are liste in the VAST specification.
          */
-        errorCode: string
+        errorCode: string,
     ): void;
     /**
      * Must be called when the user watched the linear creative until its end. Call the complete tracking URLs.
@@ -136,11 +130,7 @@ export class VASTTracker extends EventEmitter {
          * The name of the event. Call the specified event tracking URLs. Emit the specified event when done.
          */
         eventName: string,
-        /**
-         * Indicate if the event has to be tracked only once.
-         * Default: false
-         */
-        once?: boolean
+        trackOptions?: TrackOptions,
     ): void;
 }
 
@@ -187,6 +177,8 @@ export class VASTClient {
 }
 
 export class VASTParser extends EventEmitter {
+    rootURL?: string | undefined;
+
     /**
      * util method for handling urls, it is used to make the requests.
      */
@@ -216,8 +208,8 @@ export class VASTParser extends EventEmitter {
          * An Array of url templates to use to make the tracking call
          */
         urlTemplates: string[],
-        errorCode: Pick<VastError, 'ERRORCODE'>,
-        ...data: Array<Pick<VastError, Exclude<keyof VastError, 'ERRORCODE'>>>,
+        errorCode: Pick<VastError, "ERRORCODE">,
+        ...data: Array<Pick<VastError, Exclude<keyof VastError, "ERRORCODE">>>
     ): void;
     /**
      * Fetches a VAST document for the given url.
@@ -235,7 +227,7 @@ export class VASTParser extends EventEmitter {
         /**
          * url of original wrapper
          */
-        originalUrl?: string
+        previousUrl?: string,
     ): Promise<Document>;
     /**
      * Fetches and parses a VAST for the given url.
@@ -265,6 +257,15 @@ export class VASTParser extends EventEmitter {
          */
         options?: VastRequestOptions,
     ): Promise<VastResponse>;
+
+    /**
+     * Parses the given xml Object into an array of ads
+     * Returns the array or throws an `Error` if an invalid VAST XML is provided
+     */
+    parseVastXml(
+        vastXml: Document,
+        options: ParseVastXmlOptions,
+    ): VastAd[];
 }
 
 export interface VASTClientCustomStorage {
@@ -279,7 +280,7 @@ export function UrlHandlerCbType(err: Error): void;
 export interface VASTClientUrlHandler {
     get(
         url: string,
-        options: { timeout: number, withCredentials: boolean },
+        options: { timeout: number; withCredentials: boolean },
         cb: typeof UrlHandlerCbType,
     ): void;
 }
@@ -288,23 +289,23 @@ export interface VastRequestOptions {
     /**
      * A custom timeout for the requests (default 0)
      */
-    timeout?: number;
+    timeout?: number | undefined;
     /**
      * A boolean to enable the withCredentials options for the XHR and FLASH URLHandlers (default false)
      */
-    withCredentials?: boolean;
+    withCredentials?: boolean | undefined;
     /**
      * A number of Wrapper responses that can be received with no InLine response (default 0)
      */
-    wrapperLimit?: number;
+    wrapperLimit?: number | undefined;
     /**
      * Custom urlhandler to be used instead of the default ones urlhandlers
      */
-    urlHandler?: VASTClientUrlHandler;
+    urlHandler?: VASTClientUrlHandler | undefined;
     /**
      * Allows you to parse all the ads contained in the VAST or to parse them ad by ad or adPod by adPod (default true)
      */
-    resolveAll?: boolean;
+    resolveAll?: boolean | undefined;
 }
 
 export interface VastResponse {
@@ -322,9 +323,9 @@ export interface VastError {
      *      VAST error 303: No VAST response after one or more Wrappers.
      */
     ERRORCODE: string | number;
-    ERRORMESSAGE?: string;
-    extensions?: VastAdExtension[];
-    system?: VastSystem | string | null;
+    ERRORMESSAGE?: string | undefined;
+    extensions?: VastAdExtension[] | undefined;
+    system?: VastSystem | string | null | undefined;
 }
 
 export interface VastCreative {
@@ -342,9 +343,9 @@ export interface VastCreativeLinear extends VastCreative {
     icons: VastIcon[];
     mediaFiles: VastMediaFile[];
     skipDelay: number | null;
-    videoClickThroughURLTemplate: string | null;
-    videoClickTrackingURLTemplates: string[];
-    videoCustomClickURLTemplates: string[];
+    videoClickThroughURLTemplate: VastUrlValue | null;
+    videoClickTrackingURLTemplates: VastUrlValue[];
+    videoCustomClickURLTemplates: VastUrlValue[];
 }
 
 export interface VastCreativeNonLinear extends VastCreative {
@@ -356,13 +357,13 @@ export interface VastCreativeCompanion extends VastCreative {
 }
 
 export interface VastAd {
-    advertiser: string | null;
+    advertiser: VastAdvertiser[];
     creatives: VastCreative[];
     description: string | null;
     errorURLTemplates: string[];
     extensions: VastAdExtension[];
     id: string | null;
-    impressionURLTemplates: string[];
+    impressionURLTemplates: VastUrlValue[];
     pricing: string | null;
     sequence: string | null;
     survey: string | null;
@@ -371,6 +372,8 @@ export interface VastAd {
 }
 
 export interface VastAdExtension {
+    name: string | null;
+    value: any;
     attributes: VastAdAttributes;
     children: VastAdExtensionChild[];
 }
@@ -391,7 +394,7 @@ export interface VastAdChildAttributes {
 }
 
 export interface VastNonLinearAd {
-    nonLinearClickTrackingURLTemplates: string[];
+    nonLinearClickTrackingURLTemplates: VastUrlValue[];
     nonLinearClickThroughURLTemplate: string | null;
     adParameters: string | null;
     type: string | null;
@@ -412,14 +415,13 @@ export interface VastNonLinearAd {
 export interface VastCompanionAd {
     companionClickThroughURLTemplate: string | null;
     companionClickTrackingURLTemplate: string | null | undefined;
-    companionClickTrackingURLTemplates: string[];
+    companionClickTrackingURLTemplates: VastUrlValue[];
     height: string;
-    htmlResource: string | null;
+    htmlResources: string[];
     id: string | null;
-    iframeResource: string | null;
-    staticResource: string | null;
+    iframeResources: string[];
+    staticResources: StaticResource[];
     trackingEvents: VastCompanionTrackingEvents;
-    type: string | null;
     width: string;
     altText: string | null;
 }
@@ -472,6 +474,41 @@ export interface VastIcon {
     htmlResource: string | null;
     iframeResource: string | null;
     iconClickThroughURLTemplate: string | null;
-    iconClickTrackingURLTemplates: string[];
+    iconClickTrackingURLTemplates: VastUrlValue[];
     iconViewTrackingURLTemplate: string | null;
+}
+
+export interface VastAdvertiser {
+    id: string | null;
+    value: string;
+}
+
+export interface VastUrlValue {
+    id: string | null;
+    url: string;
+}
+
+export interface StaticResource {
+    url: string;
+    creativeType: string | null;
+}
+
+export interface TrackOptions {
+    /**
+     * An optional Object of parameters(vast macros) to be used in the tracking calls.
+     */
+    macros?: Record<string, any> | undefined;
+    /**
+     * Indicate if the event has to be tracked only once.
+     * Default: false
+     */
+    once?: boolean | undefined;
+}
+
+export interface ParseVastXmlOptions {
+    isRootVAST?: boolean | undefined;
+    url?: string | null | undefined;
+    wrapperDepth?: number | undefined;
+    allowMultipleAds?: boolean | undefined;
+    followAdditionalWrappers?: boolean | undefined;
 }

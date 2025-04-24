@@ -1,4 +1,4 @@
-/* tslint:disable:no-mergeable-namespace no-namespace */
+/* tslint:disable:no-namespace */
 "use strict";
 
 import conventionalChangelogCore from "conventional-changelog-core";
@@ -9,7 +9,6 @@ namespace Module {
     declare const options: conventionalChangelogCore.Options;
     declare const parserOpts: conventionalChangelogCore.ParserOptions;
     declare const writerOpts: conventionalChangelogCore.WriterOptions;
-
     // $ExpectType Readable
     conventionalChangelogCore();
     // $ExpectType Readable

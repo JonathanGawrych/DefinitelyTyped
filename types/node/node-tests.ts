@@ -1,16 +1,61 @@
-import * as fs from "fs";
-import * as url from "url";
-import * as util from "util";
-import * as http from "http";
-import * as https from "https";
-import * as net from "net";
-import * as console2 from "console";
-import * as timers from "timers";
-import * as inspector from "inspector";
-import * as trace_events from "trace_events";
+import "./test/assert";
+import "./test/async_hooks";
+import "./test/buffer";
+import "./test/child_process";
+import "./test/cluster";
+import "./test/console";
+import "./test/constants";
+import "./test/crypto";
+import "./test/dgram";
+import "./test/diagnostics_channel";
+import "./test/dns";
+import "./test/events";
+import "./test/events_generic";
+import "./test/fs";
+import "./test/globals";
+import "./test/http";
+import "./test/http2";
+import "./test/https";
+import "./test/inspector";
+import "./test/module";
+import "./test/net";
+import "./test/os";
+import "./test/path";
+import "./test/perf_hooks";
+import "./test/process";
+import "./test/querystring";
+import "./test/readline";
+import "./test/repl";
+import "./test/sea";
+import "./test/sqlite";
+import "./test/stream";
+import "./test/string_decoder";
+import "./test/test";
+import "./test/timers_promises";
+import "./test/timers";
+import "./test/tls";
+import "./test/trace_events";
+import "./test/tty";
+import "./test/url";
+import "./test/util_types";
+import "./test/util";
+import "./test/v8";
+import "./test/vm";
+import "./test/wasi";
+import "./test/worker_threads";
+import "./test/zlib";
+
+import * as http from "node:http";
+import * as http2 from "node:http2";
+import * as https from "node:https";
+import * as inspector from "node:inspector";
+import * as net from "node:net";
+import * as stream from "node:stream";
+import * as trace_events from "node:trace_events";
+import * as url from "node:url";
 
 //////////////////////////////////////////////////////
-/// Https tests : http://nodejs.org/api/https.html ///
+/// Https tests : https://nodejs.org/api/https.html ///
 //////////////////////////////////////////////////////
 
 {
@@ -20,7 +65,8 @@ import * as trace_events from "trace_events";
         maxSockets: Infinity,
         maxFreeSockets: 256,
         maxCachedSessions: 100,
-        timeout: 15000
+        timeout: 15000,
+        family: 4,
     });
 
     agent = https.globalAgent;
@@ -29,34 +75,34 @@ import * as trace_events from "trace_events";
     sockets = agent.freeSockets;
 
     https.request({
-        agent: false
+        agent: false,
     });
     https.request({
-        agent
+        agent,
     });
     https.request({
-        agent: undefined
+        agent: undefined,
     });
 
-    https.get('http://www.example.com/xyz');
-    https.request('http://www.example.com/xyz');
+    https.get("http://www.example.com/xyz");
+    https.request("http://www.example.com/xyz");
 
-    https.get('http://www.example.com/xyz', (res: http.IncomingMessage): void => {});
-    https.request('http://www.example.com/xyz', (res: http.IncomingMessage): void => {});
+    https.get("http://www.example.com/xyz", (res: http.IncomingMessage): void => {});
+    https.request("http://www.example.com/xyz", (res: http.IncomingMessage): void => {});
 
-    https.get(new url.URL('http://www.example.com/xyz'));
-    https.request(new url.URL('http://www.example.com/xyz'));
+    https.get(new url.URL("http://www.example.com/xyz"));
+    https.request(new url.URL("http://www.example.com/xyz"));
 
-    https.get(new url.URL('http://www.example.com/xyz'), (res: http.IncomingMessage): void => {});
-    https.request(new url.URL('http://www.example.com/xyz'), (res: http.IncomingMessage): void => {});
+    https.get(new url.URL("http://www.example.com/xyz"), (res: http.IncomingMessage): void => {});
+    https.request(new url.URL("http://www.example.com/xyz"), (res: http.IncomingMessage): void => {});
 
     const opts: https.RequestOptions = {
-        path: '/some/path'
+        path: "/some/path",
     };
-    https.get(new url.URL('http://www.example.com'), opts);
-    https.request(new url.URL('http://www.example.com'), opts);
-    https.get(new url.URL('http://www.example.com/xyz'), opts, (res: http.IncomingMessage): void => {});
-    https.request(new url.URL('http://www.example.com/xyz'), opts, (res: http.IncomingMessage): void => {});
+    https.get(new url.URL("http://www.example.com"), opts);
+    https.request(new url.URL("http://www.example.com"), opts);
+    https.get(new url.URL("http://www.example.com/xyz"), opts, (res: http.IncomingMessage): void => {});
+    https.request(new url.URL("http://www.example.com/xyz"), opts, (res: http.IncomingMessage): void => {});
 
     https.globalAgent.options.ca = [];
 
@@ -67,7 +113,9 @@ import * as trace_events from "trace_events";
             foo: number;
         }
 
-        class MyServerResponse extends http.ServerResponse {
+        class MyServerResponse<Request extends http.IncomingMessage = http.IncomingMessage>
+            extends http.ServerResponse<Request>
+        {
             foo: string;
         }
 
@@ -75,11 +123,11 @@ import * as trace_events from "trace_events";
 
         server = new https.Server();
         server = new https.Server(reqListener);
-        server = new https.Server({ IncomingMessage: MyIncomingMessage});
+        server = new https.Server({ IncomingMessage: MyIncomingMessage });
 
         server = new https.Server({
             IncomingMessage: MyIncomingMessage,
-            ServerResponse: MyServerResponse
+            ServerResponse: MyServerResponse,
         }, reqListener);
 
         server = https.createServer();
@@ -93,63 +141,6 @@ import * as trace_events from "trace_events";
         const maxHeadersCount: number | null = server.maxHeadersCount;
         const headersTimeout: number = server.headersTimeout;
         server.setTimeout().setTimeout(1000).setTimeout(() => {}).setTimeout(100, () => {});
-    }
-}
-
-/////////////////////////////////////////////////////
-/// Timers tests : https://nodejs.org/api/timers.html
-/////////////////////////////////////////////////////
-
-{
-    {
-        const immediate = timers
-            .setImmediate(() => {
-                console.log('immediate');
-            })
-            .unref()
-            .ref();
-        const b: boolean = immediate.hasRef();
-        timers.clearImmediate(immediate);
-    }
-    {
-        const timeout = timers
-            .setInterval(() => {
-                console.log('interval');
-            }, 20)
-            .unref()
-            .ref()
-            .refresh();
-        const b: boolean = timeout.hasRef();
-        timers.clearInterval(timeout);
-    }
-    {
-        const timeout = timers
-            .setTimeout(() => {
-                console.log('timeout');
-            }, 20)
-            .unref()
-            .ref()
-            .refresh();
-        const b: boolean = timeout.hasRef();
-        timers.clearTimeout(timeout);
-    }
-    async function testPromisify(doSomething: {
-        (foo: any, onSuccessCallback: (result: string) => void, onErrorCallback: (reason: any) => void): void;
-        [util.promisify.custom](foo: any): Promise<string>;
-    }) {
-        const setTimeout = util.promisify(timers.setTimeout);
-        let v: void = await setTimeout(100); // tslint:disable-line no-void-expression void-return
-        let s: string = await setTimeout(100, "");
-
-        const setImmediate = util.promisify(timers.setImmediate);
-        v = await setImmediate(); // tslint:disable-line no-void-expression
-        s = await setImmediate("");
-
-        // $ExpectType (foo: any) => Promise<string>
-        const doSomethingPromise = util.promisify(doSomething);
-
-        // $ExpectType string
-        s = await doSomethingPromise('foo');
     }
 }
 
@@ -171,103 +162,19 @@ import * as trace_events from "trace_events";
     }
     {
         const frame: NodeJS.CallSite = null!;
-        const frameThis: any = frame.getThis();
-        const typeName: string | null  = frame.getTypeName();
-        const func: Function | undefined  = frame.getFunction();
+        const frameThis: unknown = frame.getThis();
+        const typeName: string | null = frame.getTypeName();
+        const func: Function | undefined = frame.getFunction();
         const funcName: string | null = frame.getFunctionName();
-        const meth: string | null  = frame.getMethodName();
-        const fname: string | null  = frame.getFileName();
-        const lineno: number | null  = frame.getLineNumber();
-        const colno: number | null  = frame.getColumnNumber();
-        const evalOrigin: string | undefined  = frame.getEvalOrigin();
+        const meth: string | null = frame.getMethodName();
+        const fname: string | undefined = frame.getFileName();
+        const lineno: number | null = frame.getLineNumber();
+        const colno: number | null = frame.getColumnNumber();
+        const evalOrigin: string | undefined = frame.getEvalOrigin();
         const isTop: boolean = frame.isToplevel();
         const isEval: boolean = frame.isEval();
         const isNative: boolean = frame.isNative();
         const isConstr: boolean = frame.isConstructor();
-    }
-}
-
-///////////////////////////////////////////////////////////
-/// Console Tests : https://nodejs.org/api/console.html ///
-///////////////////////////////////////////////////////////
-
-{
-    {
-        let _c: Console = console;
-        _c = console2;
-    }
-    {
-        const writeStream = fs.createWriteStream('./index.d.ts');
-        let consoleInstance: Console = new console.Console(writeStream);
-
-        consoleInstance = new console.Console(writeStream, writeStream);
-        consoleInstance = new console.Console(writeStream, writeStream, true);
-        consoleInstance = new console.Console({
-            stdout: writeStream,
-            stderr: writeStream,
-            colorMode: 'auto',
-            ignoreErrors: true
-        });
-        consoleInstance = new console.Console({
-            stdout: writeStream,
-            colorMode: false
-        });
-        consoleInstance = new console.Console({
-            stdout: writeStream
-        });
-    }
-    {
-        console.assert('value');
-        console.assert('value', 'message');
-        console.assert('value', 'message', 'foo', 'bar');
-        console.clear();
-        console.count();
-        console.count('label');
-        console.countReset();
-        console.countReset('label');
-        console.debug();
-        console.debug('message');
-        console.debug('message', 'foo', 'bar');
-        console.dir('obj');
-        console.dir('obj', { depth: 1 });
-        console.error();
-        console.error('message');
-        console.error('message', 'foo', 'bar');
-        console.group();
-        console.group('label');
-        console.group('label1', 'label2');
-        console.groupCollapsed();
-        console.groupEnd();
-        console.info();
-        console.info('message');
-        console.info('message', 'foo', 'bar');
-        console.log();
-        console.log('message');
-        console.log('message', 'foo', 'bar');
-        console.table({ foo: 'bar' });
-        console.table([{ foo: 'bar' }]);
-        console.table([{ foo: 'bar' }], ['foo']);
-        console.time();
-        console.time('label');
-        console.timeEnd();
-        console.timeEnd('label');
-        console.timeLog();
-        console.timeLog('label');
-        console.timeLog('label', 'foo', 'bar');
-        console.trace();
-        console.trace('message');
-        console.trace('message', 'foo', 'bar');
-        console.warn();
-        console.warn('message');
-        console.warn('message', 'foo', 'bar');
-
-        // --- Inspector mode only ---
-        console.profile();
-        console.profile('label');
-        console.profileEnd();
-        console.profileEnd('label');
-        console.timeStamp();
-        console.timeStamp('label');
     }
 }
 
@@ -278,62 +185,12 @@ import * as trace_events from "trace_events";
  *****************************************************************************/
 
 ///////////////////////////////////////////////////////////
-/// Inspector Tests                                     ///
-///////////////////////////////////////////////////////////
-
-{
-    {
-        const b: inspector.Console.ConsoleMessage = {source: 'test', text: 'test', level: 'error' };
-        inspector.open();
-        inspector.open(0);
-        inspector.open(0, 'localhost');
-        inspector.open(0, 'localhost', true);
-        inspector.close();
-        const inspectorUrl: string | undefined = inspector.url();
-
-        const session = new inspector.Session();
-        session.connect();
-        session.disconnect();
-
-        // Unknown post method
-        session.post('A.b', { key: 'value' }, (err, params) => {});
-        // TODO: parameters are implicitly 'any' and need type annotation
-        session.post('A.b', (err: Error | null, params?: {}) => {});
-        session.post('A.b');
-        // Known post method
-        const parameter: inspector.Runtime.EvaluateParameterType = { expression: '2 + 2' };
-        session.post('Runtime.evaluate', parameter,
-            (err: Error | null, params: inspector.Runtime.EvaluateReturnType) => {});
-        session.post('Runtime.evaluate', (err: Error, params: inspector.Runtime.EvaluateReturnType) => {
-            const exceptionDetails: inspector.Runtime.ExceptionDetails = params.exceptionDetails!;
-            const resultClassName: string = params.result.className!;
-        });
-        session.post('Runtime.evaluate');
-
-        // General event
-        session.on('inspectorNotification', message => {
-            message; // $ExpectType InspectorNotification<{}>
-        });
-        // Known events
-        session.on('Debugger.paused', (message: inspector.InspectorNotification<inspector.Debugger.PausedEventDataType>) => {
-            const method: string = message.method;
-            const pauseReason: string = message.params.reason;
-        });
-        session.on('Debugger.resumed', () => {});
-        // Node Inspector events
-        session.on('NodeTracing.dataCollected', (message: inspector.InspectorNotification<inspector.NodeTracing.DataCollectedEventDataType>) => {
-          const value: Array<{}> = message.params.value;
-        });
-    }
-}
-
-///////////////////////////////////////////////////////////
 /// Trace Events Tests                                  ///
 ///////////////////////////////////////////////////////////
 
 {
     const enabledCategories: string | undefined = trace_events.getEnabledCategories();
-    const tracing: trace_events.Tracing = trace_events.createTracing({ categories: ['node', 'v8'] });
+    const tracing: trace_events.Tracing = trace_events.createTracing({ categories: ["node", "v8"] });
     const categories: string = tracing.categories;
     const enabled: boolean = tracing.enabled;
     tracing.enable();
@@ -345,7 +202,23 @@ import * as trace_events from "trace_events";
 ////////////////////////////////////////////////////
 
 {
-    const s = 'foo';
+    const s = "foo";
     const s1: string = s.trimLeft();
     const s2: string = s.trimRight();
+    const s3: string = s.trimStart();
+    const s4: string = s.trimEnd();
+}
+
+////////////////////////////////////////////////////
+/// Node.js http2 tests
+////////////////////////////////////////////////////
+
+{
+    http2.connect("https://foo.com", {
+        createConnection: (authority, option) => {
+            authority; // $ExpectType URL
+            option; // $ExpectType SessionOptions
+            return new stream.Duplex();
+        },
+    });
 }

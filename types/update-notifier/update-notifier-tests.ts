@@ -1,17 +1,19 @@
-/// <reference types="node" />
+import updateNotifier, { Package, UpdateInfo } from "update-notifier";
 
-import UpdateNotifier = require('update-notifier');
+declare const packageJson: Package;
 
-let notifier = UpdateNotifier();
+let notifier = updateNotifier({
+    pkg: packageJson,
+});
 
 if (notifier.update) {
     notifier.notify();
 }
 
-console.log(notifier.update);
+notifier.update; // $ExpectType UpdateInfo | undefined
 
 // Also exposed as a class
-notifier = new UpdateNotifier.UpdateNotifier({
+notifier = updateNotifier({
     updateCheckInterval: 1000 * 60 * 60 * 24 * 7, // 1 week
 });
 
@@ -21,27 +23,32 @@ if (notifier.update) {
 
     // test all options
     notifier.notify({
-        message: 'Update available: ' + notifier.update.latest,
+        message: "Update available: " + notifier.update.latest,
         defer: false,
         isGlobal: true,
         boxenOptions: {
             padding: 1,
-            margin: 1,
-            align: 'center',
-            borderColor: 'yellow',
-            borderStyle: 'round',
+            margin: {
+                top: 1,
+                bottom: 1,
+                left: 2,
+                right: 2,
+            },
+            align: "center",
+            borderColor: "yellow",
+            borderStyle: "round",
         },
     });
 }
 
 (async () => {
-    const update = await notifier.fetchInfo();
+    const update: UpdateInfo = await notifier.fetchInfo(); // $ExpectType UpdateInfo
     update.current; // $ExpectType string
     update.latest; // $ExpectType string
     update.name; // $ExpectType string
     update.type; // $ExpectType "latest" | "major" | "minor" | "patch" | "prerelease" | "build"
-    notifier.config.set('lastUpdateCheck', Date.now());
-    if (update.type && update.type !== 'latest') {
-        notifier.config.set('update', update);
+    notifier.config?.set("lastUpdateCheck", Date.now());
+    if (update.type && update.type !== "latest") {
+        notifier.config?.set("update", update);
     }
 })();

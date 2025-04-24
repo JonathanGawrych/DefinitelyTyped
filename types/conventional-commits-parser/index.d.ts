@@ -1,9 +1,3 @@
-// Type definitions for conventional-commits-parser 3.0
-// Project: https://github.com/conventional-changelog/conventional-changelog/tree/master/packages/conventional-commits-parser#readme
-// Definitions by: Jason Kwok <https://github.com/JasonHK>
-// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
-// TypeScript Version: 2.9
-
 /// <reference types="node" />
 
 import * as Stream from "stream";
@@ -25,7 +19,9 @@ declare namespace conventionalCommitsParser {
      */
     function sync(commit: string, options?: Options): Commit;
 
-    type Commit<Fields extends string | number | symbol = string | number | symbol> = CommitBase & { [Field in Exclude<Fields, keyof CommitBase>]?: Commit.Field };
+    type Commit<Fields extends string | number | symbol = string | number | symbol> =
+        & CommitBase
+        & { [Field in Exclude<Fields, keyof CommitBase>]?: Commit.Field };
 
     namespace Commit {
         type Field = string | null;
@@ -61,8 +57,8 @@ declare namespace conventionalCommitsParser {
         }
 
         interface Revert {
-            hash?: Field;
-            header?: Field;
+            hash?: Field | undefined;
+            header?: Field | undefined;
             [field: string]: Field | undefined;
         }
     }
@@ -116,9 +112,9 @@ declare namespace conventionalCommitsParser {
          */
         revert: Commit.Revert | null;
 
-        type?: Commit.Field;
-        scope?: Commit.Field;
-        subject?: Commit.Field;
+        type?: Commit.Field | undefined;
+        scope?: Commit.Field | undefined;
+        subject?: Commit.Field | undefined;
     }
 
     interface Options {
@@ -147,7 +143,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * null
          */
-        mergePattern?: Options.Pattern;
+        mergePattern?: Options.Pattern | undefined;
 
         /**
          * Used to define what capturing group of `mergePattern`.
@@ -157,7 +153,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * null
          */
-        mergeCorrespondence?: Options.Correspondence;
+        mergeCorrespondence?: Options.Correspondence | undefined;
 
         /**
          * Used to match header pattern.
@@ -165,7 +161,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * /^(\w*)(?:\(([\w\$\.\-\* ]*)\))?\: (.*)$/
          */
-        headerPattern?: Options.Pattern;
+        headerPattern?: Options.Pattern | undefined;
 
         /**
          * Used to define what capturing group of `headerPattern` captures what header
@@ -176,7 +172,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * ['type', 'scope', 'subject']
          */
-        headerCorrespondence?: Options.Correspondence;
+        headerCorrespondence?: Options.Correspondence | undefined;
 
         /**
          * Keywords to reference an issue. This value is case __insensitive__. If it's a
@@ -187,7 +183,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * ['close', 'closes', 'closed', 'fix', 'fixes', 'fixed', 'resolve', 'resolves', 'resolved']
          */
-        referenceActions?: Options.Actions;
+        referenceActions?: Options.Actions | undefined;
 
         /**
          * The prefixes of an issue. EG: In `gh-123` `gh-` is the prefix.
@@ -195,7 +191,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * ['#']
          */
-        issuePrefixes?: Options.Prefixes;
+        issuePrefixes?: Options.Prefixes | undefined;
 
         /**
          * Used to define if `issuePrefixes` should be considered case sensitive.
@@ -203,7 +199,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * false
          */
-        issuePrefixesCaseSensitive?: boolean;
+        issuePrefixesCaseSensitive?: boolean | undefined;
 
         /**
          * Keywords for important notes. This value is case __insensitive__. If it's a
@@ -212,7 +208,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * ['BREAKING CHANGE']
          */
-        noteKeywords?: Options.Keywords;
+        noteKeywords?: Options.Keywords | undefined;
 
         /**
          * Pattern to match other fields.
@@ -220,7 +216,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * /^-(.*?)-$/
          */
-        fieldPattern?: Options.Pattern;
+        fieldPattern?: Options.Pattern | undefined;
 
         /**
          * Pattern to match what this commit reverts.
@@ -228,7 +224,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * /^Revert\s"([\s\S]*)"\s*This reverts commit (\w*)\./
          */
-        revertPattern?: Options.Pattern;
+        revertPattern?: Options.Pattern | undefined;
 
         /**
          * Used to define what capturing group of `revertPattern` captures what reverted
@@ -262,7 +258,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * ['header', 'hash']
          */
-        revertCorrespondence?: Options.Correspondence;
+        revertCorrespondence?: Options.Correspondence | undefined;
 
         /**
          * What commentChar to use. By default it is `null`, so no comments are stripped.
@@ -274,7 +270,15 @@ declare namespace conventionalCommitsParser {
          * @default
          * null
          */
-        commentChar?: string | null;
+        commentChar?: string | null | undefined;
+
+        /**
+         * Breaking changes header pattern.
+         *
+         * @default
+         * undefined
+         */
+        breakingHeaderPattern?: RegExp | undefined;
 
         /**
          * What warn function to use. For example, `console.warn.bind(console)` or
@@ -284,7 +288,7 @@ declare namespace conventionalCommitsParser {
          * @default
          * function () {}
          */
-        warn?: (message?: any) => void | boolean;
+        warn?: ((message?: any) => void) | boolean | undefined;
     }
 
     namespace Options {
@@ -295,11 +299,7 @@ declare namespace conventionalCommitsParser {
         type Prefixes = string[] | string | null;
     }
 
-    export {
-        Commit,
-        Options,
-        sync,
-    };
+    export { Commit, Options, sync };
 }
 
 export = conventionalCommitsParser;
